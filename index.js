@@ -67,15 +67,14 @@ async function share(cookies, url, amount, interval) {
     'accept': '*/*',
     'accept-encoding': 'gzip, deflate',
     'connection': 'keep-alive',
-    'content-length': '0',
-    'cookie': cookies,
     'host': 'graph.facebook.com'
+    'user-agent': 'Mozilla/5.0 (X11; U; Linux x86_64) AppleWebKit/17.4.1 (KHTML, like Gecko) Ubuntu Chromium/125.0.6422.164 Chrome/125.0.6422.141 Safari/17.4.1'
   };
   let sharedCount = 0;
   let timer;
   async function sharePost() {
     try {
-      const response = await axios.post(`https://graph.facebook.com/me/feed?link=https://m.facebook.com/${id}&published=0&access_token=${accessToken}`, {}, {
+      const response = await axios.post(`https://graph.facebook.com/v21.0/me/feed?link=https://www.facebook.com/${id}&published=0&access_token=${accessToken}`, {}, {
         headers
       });
       if (response.status !== 200) {
@@ -115,20 +114,19 @@ async function getPostID(url) {
 async function getAccessToken(cookie) {
   try {
     const headers = {
-      'authority': 'business.facebook.com',
+      'authority': 'https://business.facebook.com/',
       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
       'accept-language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
       'cache-control': 'max-age=0',
+      'origin': 'https://www.facebook.com',
       'cookie': cookie,
-      'referer': 'https://www.facebook.com/',
-      'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-      'sec-ch-ua-mobile': '?0',
+      'referer': 'https://www.facebook.com',
       'sec-ch-ua-platform': '"Linux"',
       'sec-fetch-dest': 'document',
       'sec-fetch-mode': 'navigate',
       'sec-fetch-site': 'same-origin',
-      'sec-fetch-user': '?1',
-      'upgrade-insecure-requests': '1',
+      'sec-fetch-user': '?0',
+      'upgrade-insecure-requests': '0',
     };
     const response = await axios.get('https://business.facebook.com/content_management', {
       headers
@@ -146,12 +144,12 @@ async function convertCookie(cookie) {
   return new Promise((resolve, reject) => {
     try {
       const cookies = JSON.parse(cookie);
-      const sbCookie = cookies.find(cookies => cookies.key === "sb");
-      if (!sbCookie) {
+      const c_userCookie = cookies.find(cookies => cookies.key === "c_user");
+      if (!c_userCookie) {
         reject("Detect invalid appstate please provide a valid appstate");
       }
-      const sbValue = sbCookie.value;
-      const data = `sb=${sbValue}; ${cookies.slice(1).map(cookies => `${cookies.key}=${cookies.value}`).join('; ')}`;
+      const c_userValue = c_userCookie.value;
+      const data = `c_user=${c_userValue}; ${cookies.slice(1).map(cookies => `${cookies.key}=${cookies.value}`).join('; ')}`;
       resolve(data);
     } catch (error) {
       reject("Error processing appstate please provide a valid appstate");
